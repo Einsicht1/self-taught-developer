@@ -1,1 +1,1 @@
-# self-taught-developer
+# things I've studied
