@@ -623,13 +623,168 @@ class C(A, B):
 ## Chapter 4: 다형성(Polymorphism)
 
 # Unit 3: 견고한 객체 지향 프로그래밍: SOLID 원칙
+## 목차 
 - Chapter 1: 단일 책임 원칙 (Single Responsibility Principle)
 - Chapter 2: 개방 폐쇄 원칙 (Open-closed Principle)
 - Chapter 3: 리스코프 치환 원칙 (Liskov Substitution Principle)
 - Chapter 4: 인터페이스 분리 원칙 (Interface Segregation Principle)
-- Chapter 5: 의존 관계 역전 원칙 (Dependency Inversion Principle)
+- Chapter 5: 의존 관계 역전 원칙 (Dependency Inversion Principle)차
+
+## 개요
+- SOLID원칙은 Robert C. Martin이라는 유명한 개발자가 2000년도에 처음 소개한 객체 설계의 기본 원칙이다.
+- 객체 지향 프로그래밍에서 사실상 표준 규칙처럼 알려져 있다.
 ## Chapter 1: 단일 책임 원칙 (Single Responsibility Principle)
+#### 정의: 모든 클래스는 단 한가지의 책임만 갖고, 클래스 안에 정의되어 있는 모든 기능은 이 하나의 책임을 수행하는데 집중되어 있어야 한다.
+- 하나의 클래스로 너무 많은 일을 하지 말라는 뜻임.
+- 물론 어디까지가 한 가지 책임이라고 할 수 있는지는, 사람들마다 생각이 다르고, 상황에 따라서도 다르다.
+- 같이 수정해야 할 것들은 묶고, 따로 수정해야 하는 것들은 분리하기.
+- 중요한 것은 코드를 작성할 때, 내가 단일 책임 원칙을 지키고 있는지 신경쓰는 것
+- 너무 많은 기능을 수행하는 클래스는 GOD Object라고 하기도 한다(물론 안좋은 뜻이다.)
+- 아래 Ship클래스가 그 예시다. 연료, 물자, 선원, 엔진 이 모든 것을 책임지는 클래스다보니 너무 크고 유지보수가 어렵다.
+```
+class Ship:
+    """배 클래스"""
+    def __init__(self, fuel, fuel_per_hour, supplies, num_crew):
+        """연료량, 시간당 연료 소비량, 물자량, 선원 수를 인스턴스 변수로 갖는다"""
+        self.fuel = fuel
+        self.fuel_per_hour = fuel_per_hour
+        self.supplies = supplies
+        self.num_crew = num_crew
+
+    def report_fuel(self):
+        """연료량 보고 메소드"""
+        print("현재 연료는 {}l 남아 있습니다".format(self.fuel))
+
+    def load_fuel(self, amount):
+        """연료 충전 메소드"""
+        self.fuel += amount
+
+    def report_supplies(self):
+        """물자량 보고 메소드"""
+        print("현재 물자는 {}명분이 남아 있습니다".format(self.supplies))
+
+    def load_supplies(self, amount):
+        """물자 보급 메소드"""
+        self.supplies += amount
+
+    def distribute_supplies_to_crew(self):
+        """물자 배분 메소드"""
+        if self.supplies >= self.num_crew:
+            self.supplies -= self.num_crew
+            return True
+        print("물자가 부족하기 때문에 배분할 수 없습니다")
+        return False
+
+    def report_crew(self):
+        """선원 수 보고 메소드"""
+        print("현재 선원 {}명이 있습니다".format(self.num_crew))
+
+    def load_crew(self, number):
+        """선원 승선 메소드"""
+        self.num_crew += number
+
+    def run_engine_for_hours(self, hours):
+        """엔진 작동 메소드"""
+        if self.fuel > self.fuel_per_hour * hours:
+            self.fuel -= self.fuel_per_hour * hours
+            print("엔진을 {}시간 동안 돌립니다!".format(hours))
+        else:
+            print("연료가 부족하기 때문에 엔진 작동을 시작할 수 없습니다")
+```
+- 위 클래스는 연료, 선원, 물자, 엔진 총 4가지 클래스로 분리해보자.
+```
+class Ship:
+    """배 클래스"""
+    def __init__(self, fuel, fuel_per_hour, supplies, num_crew):
+        self.fuel_tank = FuelTank(fuel)
+        self.crew_manager = CrewManager(num_crew)
+        self.supply_hold = SupplyHold(supplies, self.crew_manager)
+        self.engine = Engine(self.fuel_tank, fuel_per_hour)
+
+
+class FuelTank:
+    """연료 탱크 클래스"""
+    def __init__(self, fuel):
+        """연료 탱크에 저장된 연료량을 인스턴스 변수로 갖는다"""
+        self.fuel = fuel
+
+    def load_fuel(self, amount):
+        """연료 충전 메소드"""
+        self.fuel += amount
+
+    def use_fuel(self, amount):
+        """연료 사용 메소드"""
+        if self.fuel - amount >= 0:
+            self.fuel -= amount
+            return True
+        print("연료가 부족합니다!")
+        return False
+
+    def report_fuel(self):
+        """연료량 보고 메소드"""
+        print("현재 연료는 {}l 남아 있습니다".format(self.fuel))
+
+
+class Engine:
+    """엔진 클래스"""
+    def __init__(self, fuel_tank, fuel_per_hour):
+        """연료 탱크 인스턴스와 시간당 연료 소비량을 인스턴스 변수로 갖는다"""
+        self.fuel_tank = fuel_tank
+        self.fuel_per_hour = fuel_per_hour
+
+    def run_for_hours(self, hours):
+        """엔진 작동 메소드, 연료 탱크 인스턴스를 사용한다"""
+        if self.fuel_tank.use_fuel(self.fuel_per_hour * hours):
+            print("엔진을 {}시간 동안 돌립니다!".format(hours))
+            return True
+        print("연료가 부족하기 때문에 엔진 작동을 시작할 수 없습니다")
+        return False
+
+
+class CrewManager:
+    """선원 관리 클래스"""
+    def __init__(self, num_crew):
+        """승선한 선원 수를 인스턴스 변수로 갖는다"""
+        self.num_crew = num_crew
+
+    def load_crew(self, number):
+        """선원 승선 메소드"""
+        self.num_crew += number
+
+    def report_crew(self):
+        """선원 수 보고 메소드"""
+        print("현재 선원 {}명이 있습니다".format(self.num_crew))
+
+
+class SupplyHold:
+    """물자 창고 클래스"""
+    def __init__(self, supplies, crew_manager):
+        """물자량과 선원 관리 인스턴스를 인스턴스 변수로 갖는다"""
+        self.supplies = supplies
+        self.crew_manager = crew_manager
+
+    def load_supplies(self, amount):
+        """물자 충전 메소드"""
+        self.supplies += amount
+
+    def distribute_supplies_to_crew(self):
+        """물자 배분 메소드, 각 선원들에게 동일한 양의 물자를 배분한다"""
+        if self.supplies >= self.crew_manager.num_crew:
+            self.supplies -= self.crew_manager.num_crew
+            return True
+        print("물자가 부족하기 때문에 배분할 수 없습니다")
+        return False
+
+    def report_supplies(self):
+        """물자량 보고 메소드"""
+        print("현재 물자는 {}명분이 남아 있습니다".format(self.supplies))
+```
 ## Chapter 2: 개방 폐쇄 원칙 (Open-closed Principle)
+#### 정의: 클래스는 확장에 열려 있어야하며, 수정에는 닫혀 있어야한다.
+- 확장에 열리다: 기존 기능을 확장할 수 있어야 함.
+- 수정에 닫히다: 한 번 작성한 코드를 바꾸지 않아도 되야함.
+- 어떤 클래스의 코드를 수정하지 않아도 기존 기능을 확장할 수 있어야 한다.
+- 이를 위해 추상 클래스와 추상 메서드를 정의하고 이를 상속받게 해서 사용하는 것이 좋다.
 ## Chapter 3: 리스코프 치환 원칙 (Liskov Substitution Principle)
 ## Chapter 4: 인터페이스 분리 원칙 (Interface Segregation Principle)
 ## Chapter 5: 의존 관계 역전 원칙 (Dependency Inversion Principle)
