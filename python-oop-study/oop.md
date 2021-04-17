@@ -786,5 +786,278 @@ class SupplyHold:
 - 어떤 클래스의 코드를 수정하지 않아도 기존 기능을 확장할 수 있어야 한다.
 - 이를 위해 추상 클래스와 추상 메서드를 정의하고 이를 상속받게 해서 사용하는 것이 좋다.
 ## Chapter 3: 리스코프 치환 원칙 (Liskov Substitution Principle)
+- 이 챕터의 결론: ***부모 클래스의 행동 규약을 준수하는 자식 클래스를 만들자!***
+  - 메서드 파라미터 타입과 개수, 리턴값의 타입과 개수, 변수의 타입과 개수를 일치시키자.
+- 컴퓨터 과학자 Barbara Liskov의 이름을 따서 만들어진 법칙.
+- 부모 클래스의 인스턴스를 사용하는 위치에 자식 클래스의 인스턴스를 대신 사용했을 때 코드가 원래 의도대로 작동해야 한다.
+- 이 말이 무슨 말일까?
+- 자식 클래스의 인스턴스는 부모 클래스의 인스턴스이기도 하기 때문에, isinstance(자식클래스 인스턴스, 부모 클래스)에 넣으면 True가 리턴된다.
+- 자식 클래스가 부모 클래스의 행동 규약을 어기면 안된다는 법칙이다.
+- 그렇다면 자식 클래스가 부모 클래스 행동 규약을 어긴다는 것은 구체적으로 무슨 뜻일까?
+- 자식 클래스가 부모 클래스의 변수와 메소드를 잘못 오버라이딩 하면 이런 문제가 발생한다.
+- 잘못 오버라이딩 한다는 것은 아래 두가지의 경우다.
+  - (1) 자식 클래스가 부모 클래스의 변수 타입을 바꾸거나 메소드의 파라미터 또는 리턴값이 타입 or 갯수를 바꾸는 경우
+  - (2) 자식 클래스가 부모 클래스의 의도와 다르게 메소드를 오버라이딩 하는 경우
+  
+####  자식 클래스가 부모 클래스의 변수 타입을 바꾸거나 메소드의 파라미터 또는 리턴값이 타입 or 갯수를 바꾸는 경우
+- 부모 Employee클래스의 raise_pay 메서드는 파라미터를 받지 않고, wage메서드는 숫자를 리턴하는 반면,<br>
+ 자식 Cashier클래스는 raise_pay메서드에 파라미터를 하나 추가로 받고, wage메서드에서 str을 리턴한다.
+ 이게 잘못된 예시이다.
+```
+class Employee:
+    """직원 클래스"""
+    company_name = "코드잇 버거"
+    raise_percentage = 1.03
+
+    def __init__(self, name, wage):
+        self.name = name
+        self._wage = wage
+
+    def raise_pay(self):
+        """직원 시급을 인상하는 메소드"""
+        self._wage *= self.raise_percentage
+
+    @property
+    def wage(self):
+        return self._wage
+
+    def __str__(self):
+        """직원 정보를 문자열로 리턴하는 메소드"""
+        return Employee.company_name + " 직원: " + self.name
+
+
+class Cashier(Employee):
+    """리스코프 치환 원칙을 지키지 않는 계산대 직원 클래스"""
+    burger_price = 4000
+
+    def __init__(self, name, wage, number_sold=0):
+        super().__init__(name, wage)
+        self.number_sold = number_sold
+
+    def raise_pay(self, raise_amount):
+        """직원 시급을 인상하는 메소드"""
+        self.wage += self.raise_amount
+
+    @property
+    def wage(self):
+        return "시급 정보를 알려줄 수 없습니다"
+
+```
+#### 자식 클래스가 부모 클래스의 의도와 다르게 메소드를 오버라이딩 하는 경우
+- sqaure 클래스의 width, height메서드는 부모 클래스와 다르게 작동한다.
+- 사실 정사각형은 직사각형의 행동 규약을 따르기 어렵기 때문에 애초에 상속을 안하는게 맞다.
+- 아래 코드를 옳게 고칠 땐 상속 관계를 제거한다.
+```
+class Rectangle:
+    """직사각형 클래스"""
+
+    def __init__(self, width, height):
+        """세로와 가로"""
+        self.width = width
+        self.height = height
+
+    def area(self):
+        """넓이 계산 메소드"""
+        return self.width * self.height
+
+    @property
+    def width(self):
+        """가로 변수 getter 메소드"""
+        return self._width
+
+    @width.setter
+    def width(self, value):
+        """가로 변수 setter 메소드"""
+        self._width = value if value > 0 else 1
+
+    @property
+    def height(self):
+        """세로 변수 getter 메소드"""
+        return self._height
+
+    @height.setter
+    def height(self, value):
+        """세로 변수 setter 메소드"""
+        self._height = value if value > 0 else 1
+
+
+class Square(Rectangle):
+    def __init__(self, side):
+        super().__init__(side, side)
+
+    @property
+    def width(self):
+        """가로 변수 getter 메소드"""
+        return self._width
+
+    @width.setter
+    def width(self, value):
+        """가로 변수 setter 메소드"""
+        self._width = value if value > 0 else 1
+        self._height = value if value > 0 else 1
+
+    @property
+    def height(self):
+        """세로 변수 getter 메소드"""
+        return self._height
+
+    @height.setter
+    def height(self, value):
+        """세로 변수 setter 메소드"""
+        self._width = value if value > 0 else 1
+        self._height = value if value > 0 else 1
+```
+
 ## Chapter 4: 인터페이스 분리 원칙 (Interface Segregation Principle)
+### 1. 인터페이스란?
+- 추상 클래스 중에서 추상 메소드만 있고 일반 메소드는 없는 것을 인터페이스라 부른다.
+- 파이썬에는 없는 개념.
+- 클래스가 사용하지 않을 메소드에 의존할 것을 강요하면 안 된다. = 클래스가 나중에 사용하지도 않을 메소드를 가지도록 강제하지 말라는 
+- 이미 공부했다시피 추상클래스를 상속받으면 자식 클래스는 추상 메소드들을 반드시 오버라이딩해야 한다.
+- 어떤 인터페이스(추상 클래스)를 상속받았을 때 사용하지 않을 메서드가 있다면 인터페이스 분리 원칙 위반이다.
+- 인터페이스 분리 원칙을 위반하지 않기 위해서는 인터페이스를 작게 분리해야 한다. (뚱뚱한 인터페이스를 만들지 말자.)
+- ***인터페이스를 정의할 땐 항상 더 작게 쪼갤 수 있을지 고민해야 한다.***
+- 그렇다고 인터페이스 하나당 메서드 하나만 있을 정도로 잘게 쪼개라는 것은 아니다.
+- 같은 기능이나 역할로 묶어서 인터페이스를 잘 만들어야 한다.
+<img width="689" alt="스크린샷 2021-04-17 오후 5 51 02" src="https://user-images.githubusercontent.com/70195733/115107378-871a4c80-9fa5-11eb-8971-1c249af91d55.png">
+- 아래 코드에서 IMessage를 상속받는 Memo 클래스가 생긴다고 해보자.
+- 메모는 Email, TextMessage클래스들과 달리 send기능이 없어야 하는데 IMessage를 상속받았다는 이유로 send메서드를 꼭 갖게 된다.
+- 이게 바로 인터페이스 분리 원칙 위반이다.
+- 이를 해결하기 위해 IMessage인터페이스를 IText(content, edit_content 메서드 소유)와 ISendable(send메서드 소유)로 분리하고, 메모는 IText만 상속받게 한다.
+```
+from abc import ABC, abstractmethod
+
+
+class IMessage(ABC):
+    @property
+    @abstractmethod
+    def content(self):
+        """추상 getter 메소드"""
+        pass
+
+    @abstractmethod
+    def edit_content(self, new_content: str) -> None:
+        """작성한 메시지를 수정하는 메소드"""
+        pass
+
+    @abstractmethod
+    def send(self, destination: str) -> bool:
+        """작성한 메시지를 전송하는 메소드"""
+        pass
+
+
+class Email(IMessage):
+    def __init__(self, content, owner_email):
+        """이메일은 그 내용과 보낸 사람의 이메일 주소를 인스턴스 변수로 가짐"""
+        self._content = content
+        self.owner_email = owner_email
+
+    @property
+    def content(self):
+        """_content 변수 getter 메소드"""
+        return self._content
+
+    def edit_content(self, new_content):
+        """이메일 내용 수정 메소드"""
+        self._content = self.owner_email + "님의 메일\n" + new_content
+
+    def send(self, destination):
+        """이메일 전송 메소드"""
+        print("{}에서 {}로 이메일 전송!\n내용: {}").format(self.owner_email, destination, self._content)
+        return True
+
+
+class TextMessage(IMessage):
+    def __init__(self, content):
+        """문자 메시지는 그 내용을 인스턴스 변수로 가짐"""
+        self._content = content
+
+    @property
+    def content(self):
+        """_content 변수 getter 메소드"""
+        return self._content
+
+    def edit_content(self, new_content):
+        """문자 메시지 내용 수정 메소드"""
+        self._content = new_content
+
+    def send(self, destination):
+        """문자 메시지 전송 메소드"""
+        print("{}로 문자 메시지 전송!\n내용: {}").format(destination, self._content)
+
+
+class TextReader:
+    """인스턴스의 텍스트 내용을 읽어주는 클래스"""
+
+    def __init__(self):
+        self.texts = []
+
+    def add_text(self, text: IMessage):
+        """인스턴스 추가 메소드, 파라미터는 IMessage 인터페이스를 상속받을 것"""
+        self.texts.append(text)
+
+    def read_all_texts(self):
+        """인스턴스 안에 있는 모든 텍스트 내용 출력"""
+        for text in self.texts:
+            print(text.content)
+```
 ## Chapter 5: 의존 관계 역전 원칙 (Dependency Inversion Principle)
+#### 정의
+- 상위 모듈은 하위 모듈의 구현 내용에 의존하면 안 된다.
+- 상위 모듈과 하위 모듈 모두 추상화된 내용에 의존해야 한다.
+- 두 클래스 A, B가 있을 때 A가 B를 사용하면 A는 상위모듈, B는 하위모듈이다.
+- 아래 코드에서 GameCharacter의 attack메소드가 Sword클래스를 사용하므로 GameCharacter는 상위 모듈, Sword클래스는 하위모듈이다.
+- 그리고 아래 코드는 의존 관계 역전 원칙을 위반했는데 이유는 attack에서 sowrd의 slash메소드를 의존하기 떄문이다.
+- 만약 Sword의 slash메소드의 이름이 do_slash로 바뀐다 치면 상위 모듈의 attack메소드는 정상실행되지 않고, 똑같이 내용을 바꿔줘야 한다.
+<img width="871" alt="스크린샷 2021-04-17 오후 6 23 37" src="https://user-images.githubusercontent.com/70195733/115108243-4f61d380-9faa-11eb-8e0d-f48bff392ee3.png">
+```
+이에 대한 해결책은  추상 클래스로 상위 모듈과 하위 모듈 사이에 추상화 레이어를 만드는 것입니다. 이렇게 되면
+1. 상위 모듈에는 추상 클래스의 자식 클래스의 인스턴스를 사용한다는 가정 하에 그 하위 모듈을 사용하는 코드를 작성해두면 되고,
+2. 하위 모듈은 추상 클래스의 추상 메소드들을 구현(오버라이딩)만 하면 됩니다.
+```
+
+```
+class Sword:
+    """검 클래스"""
+    def __init__(self, damage):
+        self.damage = damage
+
+    def slash(self, other_character):
+        """검 사용 메소드"""
+        other_character.get_damage(self.damage)
+
+
+class GameCharacter:
+    """게임 캐릭터 클래스"""
+    def __init__(self, name, hp, sword: Sword):
+        self.name = name
+        self.hp = hp
+        self.sword = sword
+
+    def attack(self, other_character):
+        """다른 유저를 공격하는 메소드"""
+        if self.hp > 0:
+            self.sword.slash(other_character)
+        else:
+            print(self.name + "님은 사망해서 공격할 수 없습니다.")
+
+    def change_sword(self, new_sword):
+        """검을 바꾸는 메소드"""
+        self.sword = new_sword
+
+    def get_damage(self, damage):
+        """캐릭터가 공격받았을 때 자신의 체력을 깎는 메소드"""
+        if self.hp <= damage:
+            self.hp = 0
+            print(self.name + "님은 사망했습니다.")
+        else:
+            self.hp -= damage
+
+    def __str__(self):
+        """남은 체력을 문자열로 리턴하는 메소드"""
+        return self.name + "님은 hp: {}이(가) 남았습니다.".format(self.hp)
+
+```
+- 위 문제에 대한 해결책으로 IWeapon이라는 인터페이스를 만들고 Sword 클래스가 이것을 상속받게 한다.
+
+<img width="343" alt="스크린샷 2021-04-17 오후 6 33 03" src="https://user-images.githubusercontent.com/70195733/115108429-5ccb8d80-9fab-11eb-84ca-25fde83d74f7.png">
