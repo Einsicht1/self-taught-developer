@@ -1038,8 +1038,8 @@ class GameCharacter:
         """다른 유저를 공격하는 메소드"""
         if self.hp > 0:
             self.sword.slash(other_character)
-        else:
-            print(self.name + "님은 사망해서 공격할 수 없습니다.")
+`        else:
+`            print(self.name + "님은 사망해서 공격할 수 없습니다.")
 
     def change_sword(self, new_sword):
         """검을 바꾸는 메소드"""
