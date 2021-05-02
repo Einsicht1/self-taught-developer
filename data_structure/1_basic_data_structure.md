@@ -94,6 +94,135 @@ print(id(list3))  # 140657629409096
 ## 3) 동적 배열(Dynamic array)
 - 값이 고정되지 않은 배열로, 삽입, 삭제가 가능하다.
 - 동적 배열은 사실상 정적 배열을 이용해서 만들어졌다.
+- 동적 배열을 활용해 만들어진 자료구조이다.
+- 정적 배열의 크기를 상황에 맞게 조절한다는 의미에서 이름이 동적 배열로 지어졌다.
+- 파이썬의 리스트는 동적배열이다.
+### 동적 배열 추가(append)연산 시간 복잡도
+1) 정적 배열에 남는 공간이 있을 때: O(1)
+2) 정적 배열이 꽉 찼을 때: O(n)
+
+### 분할 상환 분석 
+
+
 # 3. 링크드 리스트
 # 4. 해시 테이블
 # 5. 추상 자료형
+#### 파이썬 리스트는 동적 배열로 구현되어있다.
+![스크린샷 2021-05-02 오후 1 21 59](https://user-images.githubusercontent.com/70195733/116801919-662b2d00-ab49-11eb-9c23-b9c27670daad.png)
+
+### 큐(Queue)
+- 테이터간 순서 관계를 유지할 수 있다.
+- 맨 뒤 데이터 추가
+- 맨 앞 데이터 삭제
+- 맨 앞 데이터 접근
+
+#### python deque
+- Doubly-ended-queue의 약자
+- 맨 앞과 뒤에 데이터 삽입하고 삭제할 수 있게 해주는 자료형
+
+```
+from _collections import deque
+
+queue = deque()
+
+# queue에 데이터 삽입
+queue.append(1)
+queue.append(2)
+queue.append(3)
+queue.append(4)
+
+# queue 인덱스 접근
+print(queue[0])
+print(queue[-1])
+
+# queue 맨 앞 데이터 삭제(삭제된 데이터 리턴)
+print(queue.popleft())
+```
+- 파이썬 deque는 내부적으로 더블리 링크드 리스트로 구현되어있다.
+- 큐 앞,뒤에 삽입-삭제를 하기 때문에 동적 배열보다 더블리 링크드 리스트가 더 유리하다.
+![스크린샷 2021-05-02 오후 1 41 12](https://user-images.githubusercontent.com/70195733/116802209-20239880-ab4c-11eb-805f-172dca54198c.png)
+![스크린샷 2021-05-02 오후 1 41 17](https://user-images.githubusercontent.com/70195733/116802214-231e8900-ab4c-11eb-8c95-2b406d2d04c2.png)
+
+
+### 스택(Stack)
+- LIFO
+- 데이터간 순서 관계를 유지할 수 있다.
+- 맨 뒤 데이터 추가
+- 맨 뒤 데이터 삭제
+- 맨 뒤 데이터 접근
+- 예시: 워드에서 최종 실행 동작 취소기능은 스택으로 구현될 수 있다.
+```
+from _collections import deque
+
+queue = deque()
+
+# queue에 데이터 삽입
+queue.append(1)
+queue.append(2)
+queue.append(3)
+queue.append(4)
+
+# queue 인덱스 접근
+print(queue[-1])
+
+# queue 맨 앞 데이터 삭제(삭제된 데이터 리턴)
+print(queue.pop())
+```
+- 위 예시에선 deque를 썼다. deque는 더블리 링크드 리스트로 구현됐다.
+- 맨 뒤 삭제, 맨 뒤 삽입, 맨 앞 접근 이 세 연산은 더블리 링크드 리스트로 하던지, 동적 배열로 하던지 시간 복잡도가 같다.
+- 파이썬에서 스택은 deque로 구현하던 list로 구현하던 시간 복잡도가 똑같다.
+- 따라서 위 예시에서 deque대신 list로 바꿔도 문제 없다.
+![스크린샷 2021-05-02 오후 1 54 49](https://user-images.githubusercontent.com/70195733/116802471-04b98d00-ab4e-11eb-8f79-cd5c6984e201.png)
+
+### Set
+- 파이썬 set는 내부적으로 hash table을 이용해 구현되어있다.
+- hash_table에 value없이 key만 저장하는 형태다.
+- 해시 테이블 특성상 삽입, 탐색, 삭제가 평균 O(1)이니, 속도가 엄청 빠르다.
+<img width="883" alt="스크린샷 2021-05-02 오후 3 09 06" src="https://user-images.githubusercontent.com/70195733/116804255-5a933280-ab58-11eb-90f4-32bbec589bc8.png">
+
+####  파이썬 자료형 주요 시간 복잡도 정리
+<img width="772" alt="스크린샷 2021-05-02 오후 3 11 08" src="https://user-images.githubusercontent.com/70195733/116804294-a80f9f80-ab58-11eb-99ec-ad82cfc26ecb.png">
+<img width="815" alt="스크린샷 2021-05-02 오후 3 11 12" src="https://user-images.githubusercontent.com/70195733/116804297-acd45380-ab58-11eb-965b-356cf669e64d.png">
+
+
+### 파이썬 자료형 잘 고르기
+- 리스트가 편하다고 무조건 리스트 먼저 떠올리면 안된다.
+- 목적에 맞는 자료형 중 최적의 시간복잡도를 가진 자료형을 선택해야 한다.
+
+```
+# 예시를 위해 사용할 모듈 import
+import time
+
+# 데이터를 리스트에 저장한다
+test_list = [x for x in range(0, 1000000)]
+
+# 특정 항목이 리스트에 있는지 확인할 때 걸리는 시간 파악
+t_0 = time.time()
+999999 in test_list # 리스트 탐색
+t_1 = time.time()
+
+print(f"리스트에서 특정 항목을 찾는데 걸린 시간: {t_1 - t_0}")
+```
+
+`리스트에서 특정 항목을 찾는데 걸린 시간: 0.013087987899780273`
+
+```
+# 예시를 위해 사용할 모듈 import
+import time
+
+# 데이터를 set에 저장한다
+test_set = set([x for x in range(0, 1000000)])
+
+# 특정 항목이 set에 있는지 확인할 때 걸리는 시간 파악
+t_0 = time.time()
+999999 in test_set
+t_1 = time.time()
+
+print(f"세트에서 특정 항목을 찾는데 걸린 시간: {t_1 - t_0}")
+```
+
+`set에서 특정 항목을 찾는데 걸린 시간: 3.0994415283203125e-06`
+
+- set는0.00000309초가 걸렸다.
+- 엄청나게 큰 차이다.
+- 자료형을 잘 골라야 한다.
