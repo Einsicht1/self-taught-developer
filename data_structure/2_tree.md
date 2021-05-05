@@ -59,13 +59,81 @@ leaf 노드 (잎/말단 노드): 자식 노드를 갖고 있지 않은, 가장 �
 <img width="802" alt="스크린샷 2021-05-02 오후 4 31 35" src="https://user-images.githubusercontent.com/70195733/116805820-e5c5f580-ab63-11eb-8da6-dd5798600acf.png">
 <img width="802" alt="스크린샷 2021-05-02 오후 4 32 37" src="https://user-images.githubusercontent.com/70195733/116805838-055d1e00-ab64-11eb-9ff3-3cb121d32d31.png">
 
+### 5) 트리 순회
+- 트리 순회는 보통 재귀 함수를 쓴다.
+#### 순회 기본 동작
+- 재귀적으로 왼쪽 부분 트리 순회
+- 재귀적으로 오른쪽 부분 트리 순회
+- 현재 노드 데이터 출력
 
+#### pre-order 순회
+- 현재 노드 데이터를 출력한다.
+- 재귀적으로 왼쪽 부분 트리 순회
+- 재귀적으로 오른쪽 부분 트리 순회
+![스크린샷 2021-05-05 오후 8 53 41](https://user-images.githubusercontent.com/70195733/117136950-000e0680-ade4-11eb-9052-d68f665645c3.png)
+#### post-order 순회
+- 재귀적으로 왼쪽 부분 트리 순회
+- 재귀적으로 오른쪽 부분 트리 순회
+- 현재 노드 데이터를 출력
+![스크린샷 2021-05-05 오후 8 52 20](https://user-images.githubusercontent.com/70195733/117136775-cccb7780-ade3-11eb-8e21-8363839d96e8.png)
+#### in-order 순회
+- 재귀적으로 왼쪽 부분 트리 순회
+- 현재 노드 데이터를 출력
+- 재귀적으로 오른쪽 부분 트리 순회
+- 코드로 구현
+```
+class Node:
+    """이진 트리 노드를 나타내는 클래스"""
 
+    def __init__(self, data):
+        """이진 트리 노드는 데이터와 두 자식 노드에 대한 레퍼런스를 갖는다"""
+        self.data = data
+        self.left_child = None
+        self.right_child = None
 
+def traverse_inorder(node):
+    """in-order 순회 함수"""
+    if node is not None:
+        traverse_inorder(node.left_child)  # 재귀적으로 왼쪽 부분 트리 순회
+        print(node.data)  # 데이터 출력
+        traverse_inorder(node.right_child)  # 재귀적으로 오른쪽 부분 트리 순회
 
+```
 
+#### pre-order 순회 함수
+```
+def traverse_preorder(node):
+    """post-order 순회 함수"""
+    if node is not None:
+        print(node.data)  # 데이터 출력
+        traverse_preorder(node.left_child)  # 재귀적으로 왼쪽 부분 트리 순회
+        traverse_preorder(node.right_child)  # 재귀적으로 오른쪽 부분 트리 순회
+```
 
+#### post-order 순회 함수
+```
+def traverse_preorder(node):
+    """post-order 순회 함수"""
+    if node is not None:
+        print(node.data)  # 데이터 출력
+        traverse_preorder(node.left_child)  # 재귀적으로 왼쪽 부분 트리 순회
+        traverse_preorder(node.right_child)  # 재귀적으로 오른쪽 부분 트리 순회
+```
 # 2. 힙
 #### 힙이란?
+- 힙은 완전 이진 트리다.
+- 따라서 높이는 O(lg(n))이다.
+- 힙 속성: 모든 노드의 데이터는 자식 노드들의 데이터보다 크거나 같다.
+![스크린샷 2021-05-05 오후 10 26 24](https://user-images.githubusercontent.com/70195733/117148165-f0e18580-adf0-11eb-986c-990f6ca37cfb.png)
+
+### 힙-정렬
+- 정렬 알고리즘은 데이터를 재배치하는 구체적인 방법이다.
+- 삽입 정렬, 선택 정렬, 퀵 정렬, 합병 정렬 등이 있다.
+- [4,1,6,2,8,5] 같이 순서가 없는 데이터를 오름차순 혹은 내림차순 처럼 규칙 가지고 정렬하는 것.
+
+#### 힙 구현하기
+
+
+
 # 3. 이진 탐색 트리
 #### 이진 탐색 트리란?
